@@ -20,7 +20,7 @@
 #
 #
 # D) Summary of solution space of admissible face-type configurations
-#   Pk_wizard(V=20, S=18, k_max=6, show_solutions=FALSE)
+#   out <- Pk_wizard(V=20, S=18, k_max=6, show_solutions=FALSE)
 #   Pk_summary(out)
 #
 # E) Loose flatness-only upper bound on admissible face-type configurations as function of V (partition growth)
@@ -223,8 +223,10 @@ print.V_report <- function(x, ...) {
   
   cat("\nNext step.\n")
   cat("To explore admissible face-type configurations at this vertex count V for a chosen flatness S,\n")
-  cat("use Pk_wizard(V, S, ...) or use face_multiset_upperbound(V) a very loose flatness-only upper bound\n")
-  cat("on the number of possible face multisets\n")
+  cat("use Pk_wizard(x$V, S, ...) to enumerate admissible face-type configurations,\n")
+  cat("or use face_multiset_upperbound(V) for a very loose flatness-only upper bound\n")
+  cat("on the number of possible face multisets.\n")
+  
   
   invisible(x)
 }
