@@ -1,27 +1,28 @@
 # polyenclose.R  ---------------------------------------------------------------
 # Tests / examples (symbolic only: feasibility of face-multisets; no embedding)
 #
-# A) Vertex-range (external + internal ladders)
-#   V_report(8)                    # 8-vertex genus-0 surfaces: E/F/S ranges + internal decomposition ladder: T/Ni/Si
-#   decompose(8)                   # Internal decomposition ladder only: T/Ni/Si
 #
-# B) Check enclosure of face-multisets
+# A) Enclosure of face-multisets
 #   assess("6x4")                  # Cube: 6 squares
 #   assess("12x5")                 # Dodecahedron: 12 pentagons
 #   assess("4x3+5x4")              # “Capped cube / house-like”: 5 squares + 4 triangles (brick-house vibe)
 #   assess("36x6")                 # Sets of hexagons are too flat to enclose
-#                               
 #
-# E) Enumeration / exploration (face-type distributions for fixed V,S)
+#
+# B) Vertex-range (external + internal ladders)
+#   V_report(8)                    # 8-vertex genus-0 surfaces: E/F/S ranges + internal decomposition ladder: T/Ni/Si
+#   decompose(8)                   # Internal decomposition ladder only: T/Ni/Si                             
+#
+# C) Enumeration / exploration (face-type distributions for fixed V,S)
 #   Pk_wizard(V=20, S=24)        # Count/enumerate Pk solutions at (V,S)
 #   Pk_wizard(V=20, S=24, k_max=5) # Same, restricting to face degrees ≤ 5
 #
 #
-# F) Summarizes the solution space of admissible face-type configurations
+# D) Summary of solution space of admissible face-type configurations
 #   Pk_wizard(V=20, S=18, k_max=6, show_solutions=FALSE)
 #   Pk_summary(out)
 #
-# # G) Loose flatness-only upper bound on admissible face-type configurations as function of V (partition growth)
+# E) Loose flatness-only upper bound on admissible face-type configurations as function of V (partition growth)
 #   face_multiset_upperbound(20)
 #
 #
