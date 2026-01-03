@@ -11,7 +11,8 @@
 #
 # B) Vertex-range (external + internal ladders)
 #   V_report(8)                    # 8-vertex genus-0 surfaces: E/F/S ranges + internal decomposition ladder: T/Ni/Si
-#   decompose(8)                   # Internal decomposition ladder only: T/Ni/Si                             
+#   decompose(8)                   # Internal decomposition ladder only: T/Ni/Si 
+#   V_ladder_from_T(6)             # Computes V range for glued set of tetrahedra T
 #
 # C) Enumeration / exploration (face-type distributions for fixed V,S)
 #   Pk_wizard(V=20, S=24)        # Count/enumerate Pk solutions at (V,S)
@@ -164,10 +165,9 @@ V_report <- function(V) {
     
     internal <- data.frame(
       V  = V,
-      k  = Si_vals,     # ladder index (equals S_i)
       T  = T_vals,
       Ni = Ni_vals,
-      Si = Si_vals
+      Si = Si_vals     # internal segment count (ladder index)
     )
     
     internal_bounds <- list(
@@ -221,6 +221,11 @@ print.V_report <- function(x, ...) {
   cat("This extremal case is valid regardless of coplanarity of equatorial vertices\n")
   cat("and regardless of the geometric alignment of the two apices.\n")
   
+  cat("\nNext step.\n")
+  cat("To explore admissible face-type configurations at this vertex count V for a chosen flatness S,\n")
+  cat("use Pk_wizard(V, S, ...) or use face_multiset_upperbound(V) a very loose flatness-only upper bound\n")
+  cat("on the number of possible face multisets\n")
+  
   invisible(x)
 }
 
@@ -261,8 +266,9 @@ print.decompose <- function(x, ...) {
   
   cat("\nRemark.\n")
   cat("This ladder enumerates the admissible triples (T, Ni, Si) under SALT+MIE;\n")
-  cat("it does not depend on any embedding, only the vertex count V.\n")
-  cat("Maximal T corresponds ONLY to bipyramidal configurations, realizable at S=0.\n")
+  cat("it depends only on the vertex count V (with V >= 4) and not on any embedding.\n")
+  cat("The maximal value of T corresponds only to bipyramidal configurations\n")
+  cat("and is attainable exclusively at S = 0.\n")
   
   invisible(x)
 }
@@ -534,12 +540,18 @@ Pk_wizard <- function(V = NULL, S = NULL,
     print(footprint, row.names = FALSE)
   }
   
+  cat("\nNext step.\n")
+  cat("To summarize the solution space of admissible face-type configurations,\n")
+  cat("assign the result and call Pk_summary() on it, e.g.:\n")
+  cat(sprintf("  out <- Pk_wizard(V=%d, S=%d, k_max=%d, show_solutions=FALSE)\n", V, S, k_max))
+  cat("  Pk_summary(out)\n")
+  
+  
   out <- list(V=V, S=S, k_max=k_max, n=n, solutions=sols, counts_only=FALSE)
   class(out) <- "Pk_wizard"
   invisible(out)
 }
 
-# Optional printer for returned object
 print.Pk_wizard <- function(x, ...) {
   cat(sprintf("Pk_wizard(V=%d, S=%d, k_max=%d)\n", x$V, x$S, x$k_max))
   cat(sprintf("n_face_type_solutions=%s\n", x$n))
@@ -547,8 +559,10 @@ print.Pk_wizard <- function(x, ...) {
     poly_cols <- c("P3", paste0("P", 4:x$k_max))
     print(x$solutions[, poly_cols, drop = FALSE], row.names = FALSE)
   }
+  
   invisible(x)
 }
+
 
 # =============================================================================
 # Block E — Solution-space summary (prints insight, not huge matrices)
@@ -786,6 +800,78 @@ print.face_multiset_upperbound <- function(x, ...) {
   cat("  and is attainable only at S = 0; for any S > 0 this extremal case is excluded.\n")
   cat("• As S increases, face-type multiset diversity grows rapidly, while the\n")
   cat("  maximal achievable tetrahedral count drops from its S=0 extremum to minimal range.\n")
+  
+  cat("\nNext step.\n")
+  cat("To explore admissible face-type configurations at this vertex count V for a chosen flatness S,\n")
+  cat("use Pk_wizard(V, S, ...).\n")
+  
+  invisible(x)
+}
+
+
+# =============================================================================
+# Block E — Vertex ladder induced by tetrahedral count T (SALT+MIE)
+# =============================================================================
+#'
+#' Inverts the SALT+MIE internal ladder:
+#'   T = V - 3 + S_i,   0 <= S_i <= V - 5
+#'
+#' Equivalent constraints:
+#'   V - 3 <= T <= 2V - 8
+#' hence
+#'   ceil((T + 8)/2) <= V <= T + 3.
+#'
+#' Necessary symbolic bounds only (no realizability implied).
+#'
+#' @param T integer >= 1
+#' @return data.frame of class 'V_ladder_from_T' with columns V, Si, T
+#' @export
+V_ladder_from_T <- function(T) {
+  T <- as.integer(T)
+  if (length(T) != 1 || is.na(T) || T < 1L) stop("T must be a single integer >= 1.")
+  
+  V_min <- as.integer(ceiling((T + 8) / 2))
+  V_max <- as.integer(T + 3L)
+  
+  if (V_min > V_max) {
+    out <- data.frame(V = integer(0), Si = integer(0), Ni = integer(0), T = integer(0))
+    class(out) <- c("V_ladder_from_T", "data.frame")
+    return(out)
+  }
+  
+  V_vals  <- seq.int(V_min, V_max)
+  Si_vals <- T - V_vals + 3L
+  Ni_vals <- (V_vals - 4L) + 2L * Si_vals
+  
+  out <- data.frame(V = V_vals, Si = Si_vals, Ni = Ni_vals, T = rep.int(T, length(V_vals)))
+  class(out) <- c("V_ladder_from_T", "data.frame")
+  out
+}
+
+#' @export
+print.V_ladder_from_T <- function(x, ...) {
+  if (nrow(x) == 0L) {
+    cat("V_ladder_from_T: no admissible vertex counts under SALT+MIE.\n")
+    return(invisible(x))
+  }
+  
+  T <- x$T[1]
+  cat(sprintf("V_ladder_from_T(T=%d)\n\n", T))
+  cat("Admissible vertex ladder under SALT+MIE:\n")
+  
+  y <- x[, c("V", "T", "Ni", "Si"), drop = FALSE]
+  class(y) <- "data.frame"
+  print(y, row.names = FALSE)
+  
+  cat("\nRemark.\n")
+  cat("A fixed polyhedron (e.g. a cube with V = 8) may admit multiple distinct internal\n")
+  cat("tetrahedral decompositions with different values of (T, Ni, Si), such as\n")
+  cat("  (T = 6, Ni = 6, Si = 1) and (T = 5, Ni = 4, Si = 0).\n\n")
+  cat("This function conditions on a fixed tetrahedron count T and therefore reports\n")
+  cat("only the vertex ladder compatible with that T.\n")
+  cat("To explore alternative decompositions for a fixed vertex count V,\n")
+  cat("use decompose(V) instead.\n")
+  
   
   invisible(x)
 }
