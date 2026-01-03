@@ -1,5 +1,5 @@
 # polyenclose.R  ---------------------------------------------------------------
-# Smoke tests / examples (symbolic only: feasibility of face-multisets; no embedding)
+# Tests / examples (symbolic only: feasibility of face-multisets; no embedding)
 #
 # A) Vertex-range sanity (external + internal ladders)
 #   V_report(8)                    # 8-vertex genus-0 surfaces: E/F/S ranges + SALT+MIE ladder
@@ -501,3 +501,4 @@ print.Pk_wizard <- function(x, ...) {
   }
   invisible(x)
 }
+
