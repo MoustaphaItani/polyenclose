@@ -31,6 +31,10 @@ No geometric embedding or construction is attempted.
 - Enumerates **all admissible face-type distributions** for fixed vertex count
   `V` and flatness `S`, purely combinatorially (`Pk_wizard()`).
 
+- Summarizes the *solution space* of admissible face-type configurations
+  (face-degree prevalence, co-occurrence patterns, and diversity measures)
+  for fixed `V` and `S` (`Pk_summary()`).
+
 All results represent **necessary combinatorial conditions** for enclosure.
 
 ---
@@ -60,5 +64,20 @@ Pk_wizard(V = 8, S = 6)
 
 # Enumerate all admissible face-type configurations for fixed V and S at certain k_max (face degrees)
 Pk_wizard(V = 8, S = 6, k_max = 5)
+
+---
+
+## Interpreting enumeration results
+
+For fixed vertex count `V` and flatness `S`, `Pk_wizard()` may admit many
+distinct face-type configurations.  
+`Pk_summary()` provides a compact summary of this solution space, reporting:
+
+- how often each face degree appears across admissible configurations,
+- common face-degree co-occurrence patterns (“footprints”),
+- and a diversity measure describing how mixed face types are.
+
+All quantities are **symbolic and combinatorial**, and summarize the set of
+admissible face-type multisets rather than any single polyhedron.
 
 ```
