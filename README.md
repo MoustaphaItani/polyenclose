@@ -29,7 +29,7 @@ No geometric embedding or construction is attempted.
   (`V_report()`).
 
 - Enumerates **all admissible face-type distributions** for fixed vertex count
-  `V` and flatness `S`, purely combinatorially (`Pk_wizard()`).
+  `V` and flatness `S`, purely combinatorially (`Pk_wizard()`) (false positives are possible).
 
 - Summarizes the *solution space* of admissible face-type configurations
   (face-degree prevalence, co-occurrence patterns, and diversity measures)
@@ -53,17 +53,29 @@ The package deliberately separates symbolic admissibility from geometry.
 ## Quick examples
 
 ```r
-# Test whether a set of polygons can enclose a genus-0 surface (symbolically)
-assess("4x3+6x4")
 
-# External and internal symbolic bounds from vertex count
+# Test whether a set of polygons can enclose a genus-0 surface (symbolically)
+assess("6x4")          # cube
+assess("12x5")         # dodecahedron
+assess("4x3+5x4")      # capped-cube / house-like
+assess("36x6")         # too flat to enclose (symbolically)
+
+# External + internal symbolic bounds from vertex count
 V_report(8)
 
-# Enumerate all admissible face-type configurations for fixed V and S
-Pk_wizard(V = 8, S = 6)
+# Internal decomposition ladder only (decomposition via MININAL INTERNAL EDGE (SALT+MIE))
+decompose(8)
 
-# Enumerate all admissible face-type configurations for fixed V and S at certain k_max (face degrees)
-Pk_wizard(V = 8, S = 6, k_max = 5)
+# Vertex ladder compatible with a fixed tetrahedron count T (SALT+MIE)
+V_ladder_from_T(6)
+
+# Enumerate admissible face-type configurations for fixed V and S
+out <- Pk_wizard(V = 8, S = 3, show_solutions = FALSE)
+Pk_summary(out)
+
+# Restrict enumeration to face degrees ≤ k_max
+out <- Pk_wizard(V = 8, S = 3, k_max = 5, show_solutions = FALSE)
+Pk_summary(out)
 
 ---
 
