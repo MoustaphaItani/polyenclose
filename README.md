@@ -23,8 +23,8 @@ No geometric embedding or construction is attempted.
 - Uses the total flatness parameter, defined as the count of external / boundary
   triangulation segments (`S`), as a global obstruction variable.
 
-- Computes exact **external bounds** on edges, faces, and flatness, and
-  **internal bounds** on space-filling tetrahedra (`T`), internal triangulation segments (`S_i`),
+- Computes exact **external bounds and ladders** on edges, faces, and flatness, and
+  **internal bounds and ladders** on space-filling tetrahedra (`T`), internal triangulation segments (`S_i`),
   and internal gluing triangles (`N_i`), from a given vertex count
   (`V_report()`).
 
