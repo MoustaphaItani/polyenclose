@@ -1,7 +1,7 @@
 # polyenclose.R  ---------------------------------------------------------------
 # Tests / examples (symbolic only: feasibility of face-multisets; no embedding)
 #
-# A) Vertex-range sanity (external + internal ladders)
+# A) Vertex-range (external + internal ladders)
 #   V_report(8)                    # 8-vertex genus-0 surfaces: E/F/S ranges + SALT+MIE ladder
 #
 # B) Canonical face-multisets (known polyhedra; should pass symbolic checks)
@@ -501,4 +501,5 @@ print.Pk_wizard <- function(x, ...) {
   }
   invisible(x)
 }
+
 
