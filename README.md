@@ -35,7 +35,8 @@ No geometric embedding or construction is attempted.
   (face-degree prevalence, co-occurrence patterns, and diversity measures)
   for fixed `V` and `S` (`Pk_summary()`).
 
-- Estimates loose upper bound on admissible face-type configurations as function of V and its S-range (partition growth)
+- Estimates a loose upper bound on admissible face-type configurations
+  as a function of V and its S-range (partition growth).
 
 
 All results represent **necessary combinatorial conditions** for enclosure.
@@ -66,7 +67,7 @@ assess("36x6")         # too flat to enclose (symbolically)
 # External + internal symbolic bounds from vertex count
 V_report(8)
 
-# Internal decomposition ladder only (decomposition via MININAL INTERNAL EDGE (SALT+MIE))
+# Internal decomposition ladder only (via minimal internal edge decomposition; SALT+MIE)
 decompose(8)
 
 # Vertex ladder compatible with a fixed tetrahedron count T (SALT+MIE)
@@ -83,6 +84,8 @@ Pk_summary(out)
 out <- Pk_wizard(V = 8, S = 3, k_max = 5, show_solutions = FALSE)
 Pk_summary(out)
 
+```
+
 ---
 
 ## Interpreting enumeration results
@@ -98,4 +101,4 @@ distinct face-type configurations.
 All quantities are **symbolic and combinatorial**, and summarize the set of
 admissible face-type multisets rather than any single polyhedron.
 
-```
+
