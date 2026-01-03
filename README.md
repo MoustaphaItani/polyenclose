@@ -58,4 +58,7 @@ V_report(8)
 # Enumerate all admissible face-type configurations for fixed V and S
 Pk_wizard(V = 8, S = 6)
 
+# Enumerate all admissible face-type configurations for fixed V and S at certain k_max (face degrees)
+Pk_wizard(V = 8, S = 6, k_max=5)
+
 ```
