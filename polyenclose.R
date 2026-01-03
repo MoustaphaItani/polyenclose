@@ -9,7 +9,7 @@
 #   assess("6x4")                  # Cube: 6 squares
 #   assess("12x5")                 # Dodecahedron: 12 pentagons
 #   assess("4x3+5x4")              # “Capped cube / house-like”: 5 squares + 4 triangles (brick-house vibe)
-#   assess("36x6")                 # Sets of hexahons are too flat to enclose
+#   assess("36x6")                 # Sets of hexagons are too flat to enclose
 #                               
 #
 # E) Enumeration / exploration (face-type distributions for fixed V,S)
@@ -783,7 +783,6 @@ print.face_multiset_upperbound <- function(x, ...) {
   cat("• At S = 0 (fully triangulated surface), the external face-type diversity is minimal.\n")
   cat("• The maximal tetrahedral endpoint in the SALT+MIE ladder (T = T_max) occurs only in bipyramidal configurations,\n")
   cat("  and is attainable only at S = 0; for any S > 0 this extremal case is excluded.\n")
-  cat("  is attainable only at S = 0 as well as the rest of the T/Ni/Si ladder; for any S > 0 this extremal case is excluded.\n")
   cat("• As S increases, face-type multiset diversity grows rapidly, while the\n")
   cat("  maximal achievable tetrahedral count drops from its S=0 extremum to minimal range.\n")
   
