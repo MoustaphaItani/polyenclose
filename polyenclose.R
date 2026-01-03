@@ -1,20 +1,16 @@
 # polyenclose.R  ---------------------------------------------------------------
 # Tests / examples (symbolic only: feasibility of face-multisets; no embedding)
 #
-# A) Vertex-range sanity (external + internal ladders)
+# A) Vertex-range (external + internal ladders)
 #   V_report(8)                    # 8-vertex genus-0 surfaces: E/F/S ranges + internal decomposition ladder: T/Ni/Si
 #   decompose(8)                   # Internal decomposition ladder only: T/Ni/Si
 #
-# B) Canonical face-multisets (known polyhedra; should pass symbolic checks)
+# B) Check enclosure of face-multisets
 #   assess("6x4")                  # Cube: 6 squares
 #   assess("12x5")                 # Dodecahedron: 12 pentagons
-#
-# C) “House / dome / capped” mixed faces (symbolically plausible combos; not unique geometrically)
-#   assess("4x3+5x4")            # “Capped cube / house-like”: 5 squares + 4 triangles (brick-house vibe)
-#                                # Interpretation: cube-like body with a pyramidal cap replacing one square
-# D) 36 hexagons
-#   assess("36x6")            
-#                                # Interpretation: sets of hexahons are too flat to enclose
+#   assess("4x3+5x4")              # “Capped cube / house-like”: 5 squares + 4 triangles (brick-house vibe)
+#   assess("36x6")                 # Sets of hexahons are too flat to enclose
+#                               
 #
 # E) Enumeration / exploration (face-type distributions for fixed V,S)
 #   Pk_wizard(V=20, S=24)        # Count/enumerate Pk solutions at (V,S)
@@ -22,7 +18,7 @@
 #
 #
 # F) Summarizes the solution space of admissible face-type configurations
-#   out <- Pk_wizard(V=20, S=18, k_max=6, show_solutions=FALSE)
+#   Pk_wizard(V=20, S=18, k_max=6, show_solutions=FALSE)
 #   Pk_summary(out)
 #
 # # G) Loose flatness-only upper bound on admissible face-type configurations as function of V (partition growth)
