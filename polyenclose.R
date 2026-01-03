@@ -1,12 +1,12 @@
 # polyenclose.R  ---------------------------------------------------------------
-# Tests / examples (symbolic only: feasibility of face-multisets; no embedding)
+# Smoke tests / examples (symbolic only: feasibility of face-multisets; no embedding)
 #
-# A) Vertex-range (external + internal ladders)
-#   V_report(8)                    # 8-vertex genus-0 surfaces: E/F/S ranges + internal decomposition ladder T/Ni/Si
+# A) Vertex-range sanity (external + internal ladders)
+#   V_report(8)                    # 8-vertex genus-0 surfaces: E/F/S ranges + SALT+MIE ladder
 #
 # B) Canonical face-multisets (known polyhedra; should pass symbolic checks)
-#   assess("6x4")                  # Cube: 6 squares (cube)
-#   assess("12x5")                 # Dodecahedron: 12 pentagons (dodecahedron)
+#   assess("6x4")                  # Cube: 6 squares (Pk matches cube)
+#   assess("12x5")                 # Dodecahedron: 12 pentagons (Pk matches dodecahedron)
 #
 # C) “House / dome / capped” mixed faces (symbolically plausible combos; not unique geometrically)
 #   assess("4x3+5x4")            # “Capped cube / house-like”: 5 squares + 4 triangles (brick-house vibe)
@@ -501,6 +501,3 @@ print.Pk_wizard <- function(x, ...) {
   }
   invisible(x)
 }
-
-
-
