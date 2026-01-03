@@ -1,12 +1,13 @@
 # polyenclose.R  ---------------------------------------------------------------
-# Smoke tests / examples (symbolic only: feasibility of face-multisets; no embedding)
+# Tests / examples (symbolic only: feasibility of face-multisets; no embedding)
 #
 # A) Vertex-range sanity (external + internal ladders)
-#   V_report(8)                    # 8-vertex genus-0 surfaces: E/F/S ranges + SALT+MIE ladder
+#   V_report(8)                    # 8-vertex genus-0 surfaces: E/F/S ranges + internal decomposition ladder: T/Ni/Si
+#   decompose(8)                   # Internal decomposition ladder only: T/Ni/Si
 #
 # B) Canonical face-multisets (known polyhedra; should pass symbolic checks)
-#   assess("6x4")                  # Cube: 6 squares (Pk matches cube)
-#   assess("12x5")                 # Dodecahedron: 12 pentagons (Pk matches dodecahedron)
+#   assess("6x4")                  # Cube: 6 squares
+#   assess("12x5")                 # Dodecahedron: 12 pentagons
 #
 # C) “House / dome / capped” mixed faces (symbolically plausible combos; not unique geometrically)
 #   assess("4x3+5x4")            # “Capped cube / house-like”: 5 squares + 4 triangles (brick-house vibe)
@@ -18,8 +19,16 @@
 # E) Enumeration / exploration (face-type distributions for fixed V,S)
 #   Pk_wizard(V=20, S=24)        # Count/enumerate Pk solutions at (V,S)
 #   Pk_wizard(V=20, S=24, k_max=5) # Same, restricting to face degrees ≤ 5
-
-
+#
+#
+# F) Summarizes the solution space of admissible face-type configurations
+#   out <- Pk_wizard(V=20, S=18, k_max=6, show_solutions=FALSE)
+#   Pk_summary(out)
+#
+# # G) Loose flatness-only upper bound on admissible face-type configurations as function of V (partition growth)
+#   face_multiset_upperbound(20)
+#
+#
 # =============================================================================
 # Block A — Helpers: validate + parse Pk
 # =============================================================================
@@ -219,6 +228,50 @@ print.V_report <- function(x, ...) {
 }
 
 # =============================================================================
+# Block B2 — Internal-only entry point: decompose(V)
+# =============================================================================
+
+#' Internal decomposition ladder only (SALT+MIE)
+#'
+#' Convenience wrapper around V_report(V) that prints ONLY the internal
+#' decomposition ladder (T/Ni/Si) and its coupled bounds.
+#'
+#' @param V integer >= 4
+#' @return object of class 'decompose' (invisibly printed by print.decompose)
+#' @export
+decompose <- function(V) {
+  vr <- V_report(V)
+  out <- list(
+    V = vr$V,
+    internal = vr$internal,
+    internal_bounds = vr$bounds$internal
+  )
+  class(out) <- "decompose"
+  out
+}
+
+#' @export
+print.decompose <- function(x, ...) {
+  cat(sprintf("decompose(V=%d)\n\n", x$V))
+  
+  ib <- x$internal_bounds
+  cat("Internal bounds (SALT+MIE):\n")
+  cat(sprintf("  T in [%s, %s],  Ni in [%s, %s],  Si in [%s, %s]\n\n",
+              ib$T_min, ib$T_max, ib$Ni_min, ib$Ni_max, ib$Si_min, ib$Si_max))
+  
+  cat("Internal decomposition ladder (ranges are coupled):\n")
+  print(x$internal, row.names = FALSE)
+  
+  cat("\nRemark.\n")
+  cat("This ladder enumerates the admissible triples (T, Ni, Si) under SALT+MIE;\n")
+  cat("it does not depend on any embedding, only the vertex count V.\n")
+  cat("Maximal T corresponds ONLY to bipyramidal configurations, realizable at S=0.\n")
+  
+  invisible(x)
+}
+
+
+# =============================================================================
 # Block C — Pk invariants + symbolic feasibility report (Section 7 filter)
 # =============================================================================
 
@@ -237,7 +290,7 @@ pk_invariants <- function(Pk) {
 
 assess <- function(Pk) {
   
-  # ---- dispatch: allow pk_report("V=8") ----
+  # ---- dispatch: allow assess("V=8") ----
   if (is.character(Pk) && length(Pk) == 1) {
     s <- gsub("\\s+", "", Pk)
     if (grepl("^V=\\d+$", s, ignore.case = TRUE)) {
@@ -323,34 +376,32 @@ Pk_count_one <- function(V, S, k_max = V-1L) {
   if (S > vr$bounds$S_max) return(0L)
   F <- (2L*V - 4L) - S
   
-  # weights w = k-3 for k=4..k_max
   w <- 1L:(k_max - 3L)
-  if (length(w) == 0L) {
-    # only triangles allowed; feasible only if S=0
-    return(if (S == 0L) 1L else 0L)
-  }
+  if (length(w) == 0L) return(if (S == 0L) 1L else 0L)
   
-  # dp[s+1, m+1] = number of ways to make sum s and use m non-triangle faces
   dp <- matrix(0, nrow = S + 1L, ncol = F + 1L)
-  dp[1L, 1L] <- 1  # sum=0, m=0
+  dp[1L, 1L] <- 1L  # sum=0, m=0
   
   for (wi in w) {
+    dp_prev <- dp
+    dp_new  <- dp_prev
     for (s0 in 0:S) {
       for (m0 in 0:F) {
-        cur <- dp[s0 + 1L, m0 + 1L]
-        if (cur == 0) next
+        cur <- dp_prev[s0 + 1L, m0 + 1L]
+        if (cur == 0L) next
         max_t <- min((S - s0) %/% wi, F - m0)
-        if (max_t <= 0) next
+        if (max_t <= 0L) next
         for (t in 1:max_t) {
-          dp[s0 + t*wi + 1L, m0 + t + 1L] <- dp[s0 + t*wi + 1L, m0 + t + 1L] + cur
+          dp_new[s0 + t*wi + 1L, m0 + t + 1L] <- dp_new[s0 + t*wi + 1L, m0 + t + 1L] + cur
         }
       }
     }
+    dp <- dp_new
   }
   
-  # any m <= F is allowed; P3 = F - m >= 0
   sum(dp[S + 1L, 1L:(F + 1L)])
 }
+
 
 #' Enumerate face-type solutions Pk for fixed V,S
 #' Returns a data.frame with columns P3..Pkmax plus metadata.
@@ -499,5 +550,246 @@ print.Pk_wizard <- function(x, ...) {
     poly_cols <- c("P3", paste0("P", 4:x$k_max))
     print(x$solutions[, poly_cols, drop = FALSE], row.names = FALSE)
   }
+  invisible(x)
+}
+
+# =============================================================================
+# Block E — Solution-space summary (prints insight, not huge matrices)
+# =============================================================================
+
+#' Summarize face-type solution space from Pk_wizard() output or a solutions data.frame
+#'
+#' @param x A Pk_wizard object (from Pk_wizard()) or a data.frame of solutions
+#' @param top_n Integer. Show top-N most common "footprints" (presence patterns).
+#' @param digits Integer. Rounding digits for means.
+#' @param quiet Logical. If TRUE, return list without printing.
+#' @return A list with per-face-type stats, footprint frequencies, and entropy stats.
+#' @export
+Pk_summary <- function(x, top_n = 10L, digits = 3L, quiet = FALSE) {
+  top_n <- as.integer(top_n); digits <- as.integer(digits)
+  
+  # ---- accept either Pk_wizard object or a raw solutions df ----
+  if (inherits(x, "Pk_wizard")) {
+    sols <- x$solutions
+    meta <- list(V = x$V, S = x$S, k_max = x$k_max, n = x$n)
+  } else if (is.data.frame(x)) {
+    sols <- x
+    meta <- list(V = if ("V" %in% names(sols)) unique(sols$V) else NA,
+                 S = if ("S" %in% names(sols)) unique(sols$S) else NA,
+                 k_max = NA, n = nrow(sols))
+  } else {
+    stop("Pk_summary() expects a Pk_wizard object or a solutions data.frame.")
+  }
+  
+  if (is.null(sols) || nrow(sols) == 0L) {
+    out <- list(meta = meta, n_solutions = 0L, face_stats = data.frame(),
+                footprints = data.frame(), entropy = data.frame())
+    if (!quiet) cat("Pk_summary: no solutions to summarize.\n")
+    return(out)
+  }
+  
+  # ---- detect Pk columns ----
+  pk_cols <- grep("^P[0-9]+$", names(sols), value = TRUE)
+  if (length(pk_cols) == 0L) stop("No Pk columns found (expected columns like P3, P4, ...).")
+  
+  # sort by degree
+  deg <- as.integer(sub("^P", "", pk_cols))
+  pk_cols <- pk_cols[order(deg)]
+  deg <- sort(deg)
+  
+  X <- as.matrix(sols[, pk_cols, drop = FALSE])
+  storage.mode(X) <- "integer"
+  
+  n_sol <- nrow(X)
+  
+  # ---- per-face stats ----
+  present <- colSums(X > 0L) / n_sol
+  face_stats <- data.frame(
+    k = deg,
+    col = pk_cols,
+    present_pct = round(100 * present, digits),
+    min = apply(X, 2, min),
+    max = apply(X, 2, max),
+    mean = round(colMeans(X), digits),
+    stringsAsFactors = FALSE
+  )
+  
+  # ---- footprint classes: presence/absence pattern ----
+  fp <- (X > 0L) * 1L
+  fp_key <- apply(fp, 1, paste0, collapse = "")
+  tab <- sort(table(fp_key), decreasing = TRUE)
+  top <- head(tab, top_n)
+  
+  # decode footprint key to "has_Pk" list
+  decode_key <- function(key) {
+    bits <- as.integer(strsplit(key, "", fixed = TRUE)[[1]])
+    cols_present <- pk_cols[which(bits == 1L)]
+    if (length(cols_present) == 0L) return("(none)")
+    paste(cols_present, collapse = "+")
+  }
+  
+  footprints <- data.frame(
+    footprint_key = names(top),
+    footprint = vapply(names(top), decode_key, character(1)),
+    count = as.integer(top),
+    pct = round(100 * as.integer(top) / n_sol, digits),
+    stringsAsFactors = FALSE
+  )
+  
+  # ---- entropy of face-type mix per solution (normalized by F) ----
+  # H = -sum p_k log p_k with p_k = Pk/F, ignoring zeros.
+  F_tot <- rowSums(X)
+  safe_entropy <- function(row, F) {
+    if (F <= 0) return(NA_real_)
+    p <- row / F
+    p <- p[p > 0]
+    -sum(p * log(p))
+  }
+  H <- mapply(safe_entropy, split(X, row(X)), F_tot)  # vectorized-ish trick
+  H <- as.numeric(H)
+  
+  entropy <- data.frame(
+    H_min = min(H, na.rm = TRUE),
+    H_max = max(H, na.rm = TRUE),
+    H_mean = mean(H, na.rm = TRUE),
+    H_median = stats::median(H, na.rm = TRUE),
+    stringsAsFactors = FALSE
+  )
+  entropy[] <- lapply(entropy, function(z) round(z, digits))
+  
+  out <- list(
+    meta = meta,
+    n_solutions = n_sol,
+    face_stats = face_stats,
+    footprints = footprints,
+    entropy = entropy
+  )
+  
+  if (!quiet) {
+    cat(sprintf("Pk_summary: V=%s, S=%s\n", meta$V, meta$S))
+    if (!is.na(meta$k_max)) cat(sprintf("  k_max=%s\n", meta$k_max))
+    cat(sprintf("  solutions=%d\n\n", n_sol))
+    
+    cat("Per-face-type stats:\n")
+    print(face_stats[, c("k", "present_pct", "min", "max", "mean")], row.names = FALSE)
+    
+    cat("\nTop footprint classes (presence patterns):\n")
+    print(footprints, row.names = FALSE)
+    
+    cat("\nEntropy of face-type mix (H):\n")
+    print(entropy, row.names = FALSE)
+    
+    cat("\nInterpretation notes:\n")
+    cat("• All statistics are computed across ALL admissible face-type solutions,\n")
+    cat("  not for a single polyhedron.\n\n")
+    cat("• Solutions include FALSE POSITIVES.\n\n")
+    
+    cat("• present_pct: percentage of solutions in which at least one k-gon appears.\n")
+    cat("• min / max  : symbolic extremal counts of each face degree.\n")
+    cat("• mean       : average number of k-gons per admissible solution.\n\n")
+    
+    cat("• Footprints record which face degrees are present (ignoring multiplicity).\n")
+    cat("  They describe structural patterns and co-occurrence constraints.\n\n")
+    
+    cat("• Entropy H measures how mixed the face types are within a solution:\n")
+    cat("    H = 0     → all faces have the same degree (single face type)\n")
+    cat("    larger H → greater heterogeneity of face types\n")
+    cat("  H_min / H_max bound symbolic flexibility,\n")
+    cat("  while H_mean / H_median describe a typical admissible surface.\n")
+    
+  }
+  
+ invisible(out)
+}
+
+# =============================================================================
+# Block F — Flatness-only loose upper bound (unrestricted partitions)
+# =============================================================================
+
+#' Loose upper bound on number of face-type multisets from flatness alone
+#'
+#' This computes a *very loose* upper bound on the number of distinct face-type
+#' multisets compatible with a vertex count V, using unrestricted integer
+#' partitions of the flatness budget S.
+#'
+#' Specifically, it returns sum_{S=0}^{S_max(V)} p(S), where p(S) is the
+#' unrestricted partition function.
+#'
+#' Important: This ignores face-count constraints (F = 2V-4-S), ignores any
+#' bound on face degrees (k_max), ignores vertex-type incidence constraints,
+#' and ignores geometric realizability. It is intended only as a
+#' "combinatorial explosion / search-space scale" diagnostic.
+#'
+#' @param V integer >= 4
+#' @return A list with V, S_max, a by_S table (S, p_S, cumulative), and total.
+#' @export
+face_multiset_upperbound <- function(V) {
+  V <- as.integer(V)
+  if (length(V) != 1 || is.na(V) || V < 4L) stop("V must be a single integer >= 4.")
+  
+  vr <- V_report(V)
+  S_max <- as.integer(vr$bounds$S_max)
+  
+  p <- partition_numbers_up_to(S_max)
+  
+  by_S <- data.frame(
+    V = V,
+    S = 0:S_max,
+    p_S = p,
+    cumulative = cumsum(p)
+  )
+  
+  out <- list(
+    V = V,
+    S_max = S_max,
+    by_S = by_S,
+    total = sum(p)
+  )
+  class(out) <- "face_multiset_upperbound"
+  out
+}
+
+#' Compute unrestricted partition numbers p(0..n) by dynamic programming
+#'
+#' p(0) = 1 and p(n) counts the number of integer partitions of n.
+#' Uses an O(n^2) DP; fine for the S_max ranges used in polyenclose.
+#'
+#' @param n integer >= 0
+#' @return integer vector length (n+1) giving p(0),...,p(n)
+partition_numbers_up_to <- function(n) {
+  n <- as.integer(n)
+  if (length(n) != 1 || is.na(n) || n < 0L) stop("n must be a single integer >= 0.")
+  
+  # Use numeric to avoid integer overflow for moderate n; users can format later.
+  p <- numeric(n + 1L)
+  p[1L] <- 1  # p(0)=1
+  
+  # Standard partition DP: for each part size k, update counts
+  for (k in 1L:n) {
+    for (i in k:n) {
+      p[i + 1L] <- p[i + 1L] + p[i - k + 1L]
+    }
+  }
+  
+  p
+}
+
+#' @export
+print.face_multiset_upperbound <- function(x, ...) {
+  cat(sprintf("face_multiset_upperbound(V=%d)\n", x$V))
+  cat(sprintf("S_max(V) = %d\n", x$S_max))
+  cat(sprintf("sum_{S=0}^{S_max} p(S) = %s\n\n", format(x$total, scientific = FALSE)))
+  
+  cat("By-S table (unrestricted partitions):\n")
+  print(x$by_S, row.names = FALSE)
+  
+  cat("\nInterpretive note:\n")
+  cat("• At S = 0 (fully triangulated surface), the external face-type diversity is minimal.\n")
+  cat("• The maximal tetrahedral endpoint in the SALT+MIE ladder (T = T_max) occurs only in bipyramidal configurations,\n")
+  cat("  and is attainable only at S = 0; for any S > 0 this extremal case is excluded.\n")
+  cat("  is attainable only at S = 0 as well as the rest of the T/Ni/Si ladder; for any S > 0 this extremal case is excluded.\n")
+  cat("• As S increases, face-type multiset diversity grows rapidly, while the\n")
+  cat("  maximal achievable tetrahedral count drops from its S=0 extremum to minimal range.\n")
+  
   invisible(x)
 }
