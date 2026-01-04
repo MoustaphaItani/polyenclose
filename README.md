@@ -20,7 +20,7 @@ No geometric embedding or construction is attempted.
 - Tests **symbolic enclosure feasibility** of polygon multisets using Euler,
   incidence, and flatness constraints (`assess()`) (false positives are possible).
 
-- Uses the total flatness parameter, defined as the count of external / boundary
+- Uses the total flatness parameter (a combinatorial, not geometric quantity), defined as the count of external / boundary
   triangulation segments (`S`), as a global obstruction variable.
 
 - Computes exact **external bounds and ladders** on edges, faces, and flatness, and
