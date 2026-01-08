@@ -18,22 +18,21 @@ No geometric embedding or construction is attempted.
 ## What this package does
 
 - Tests **symbolic enclosure feasibility** of polygon multisets using Euler,
-  incidence, and flatness constraints (`assess()`) (false positives are possible).
+  incidence, and flatness constraints (false positives are possible).
 
 - Uses the total flatness parameter (a combinatorial, not geometric quantity), defined as the count of external / boundary
   triangulation segments (`S`), as a global obstruction variable.
 
 - Computes exact **external bounds and ladders** on edges, faces, and flatness, and
   **internal bounds and ladders** on space-filling tetrahedra (`T`), internal triangulation segments (`S_i`),
-  and internal gluing triangles (`N_i`), from a given vertex count
-  (`V_report()`).
+  and internal gluing triangles (`N_i`), from a given vertex count.
 
 - Enumerates **all admissible face-type distributions** for fixed vertex count
-  `V` and flatness `S`, purely combinatorially (`Pk_wizard()`) (false positives are possible).
+  `V` and flatness `S`, purely combinatorially (false positives are possible).
 
 - Summarizes the *solution space* of admissible face-type configurations
   (face-degree prevalence, co-occurrence patterns, and diversity measures)
-  for fixed `V` and `S` (`Pk_summary()`).
+  for fixed `V` and `S`.
 
 - Estimates a loose upper bound on admissible face-type configurations
   as a function of V and its S-range (partition growth).
