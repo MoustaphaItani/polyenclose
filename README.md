@@ -20,9 +20,13 @@ No geometric embedding or construction is attempted.
 - Tests **symbolic enclosure feasibility** of polygon multisets using Euler,
   incidence, and flatness constraints (false positives are possible).
 
-- Uses the total flatness parameter (a combinatorial, not geometric quantity), defined as the count of external / boundary
-  triangulation segments (`S`), as a global obstruction variable.
+- Uses the total flatness parameter (a combinatorial, not geometric quantity),
+ defined as a global flatness parameter (`S`) measuring   deviation from a fully triangulated surface.
+ Equivalently: `S` counts coplanarity merges of adjacent triangles
+         (each merge removes one internal diagonal).
 
+- Assumes polyhedra admit a combinatorial tetrahedral decomposition, with tetrahedra glued pairwise along entire faces.
+  
 - Computes exact **external bounds and ladders** on edges, faces, and flatness, and
   **internal bounds and ladders** on space-filling tetrahedra (`T`), internal triangulation segments (`S_i`),
   and internal gluing triangles (`N_i`), from a given vertex count.
@@ -63,14 +67,14 @@ assess("12x5")         # dodecahedron
 assess("4x3+5x4")      # capped-cube / house-like
 assess("36x6")         # too flat to enclose (symbolically)
 
-# External + internal symbolic bounds from vertex count
+# Fix V=8: external ranges (E,F,S) + internal decomposition ladder (T,Ni,Si)
 V_report(8)
 
-# Internal decomposition ladder only (via minimal internal edge decomposition; SALT+MIE)
+# Fix V=8: Internal decomposition ladder only: admissible (T,Ni,Si)
 decompose(8)
 
-# Vertex ladder compatible with a fixed tetrahedron count T (SALT+MIE)
-V_ladder_from_T(6)
+# Fix T=6: admissible vertex ladder (V,Ni,Si) 
+T_report(6)
 
 # Loose upper bound on admissible face-type configurations as function of V and its S-range
 face_multiset_upperbound(20)
