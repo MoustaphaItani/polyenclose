@@ -1,21 +1,40 @@
 # polyenclose.R  ---------------------------------------------------------------
+# =============================================================================
+# polyenclose — symbolic combinatorics of genus-0 polyhedral surfaces
+#
+# Core variables (used throughout):
+#   V   = number of vertices
+#   E   = number of edges
+#   F   = number of faces
+#
+#   S   = flatness (sum_f (deg(f) − 3)); S = 0 ⇔ fully triangulated surface
+#         Equivalently: S counts coplanarity merges of adjacent triangles
+#         (each merge removes one internal diagonal)
+#
+#   T   = number of tetrahedra in an internal decomposition
+#   Ni  = number of internal gluing triangles
+#   Si  = number of internal triangulation segments
+#
+# All routines are symbolic only: no geometric embedding or realizability
+# is assumed unless explicitly stated.
+# =============================================================================
 # Tests / examples (symbolic only: feasibility of face-multisets; no embedding)
 #
 #
-# A) Enclosure of face-multisets
+# A) Enclosure of face-multisets where input is set of polygons
 #   assess("6x4")                  # Cube: 6 squares
 #   assess("12x5")                 # Dodecahedron: 12 pentagons
 #   assess("4x3+5x4")              # “Capped cube / house-like”: 5 squares + 4 triangles (brick-house vibe)
 #   assess("36x6")                 # Sets of hexagons are too flat to enclose
 #
 #
-# B) Vertex-range (external + internal ladders)
-#   V_report(8)                    # 8-vertex genus-0 surfaces: E/F/S ranges + internal decomposition ladder: T/Ni/Si
-#   decompose(8)                   # Internal decomposition ladder only: T/Ni/Si 
-#   V_ladder_from_T(6)             # Computes V range for glued set of tetrahedra T
+# B) Vertex-conditioned vs T-conditioned reports (symbolic ladders)
+#   V_report(8)     # Fix V=8: external ranges (E,F,S) + internal SALT+MIE ladder (T,Ni,Si)
+#   T_report(6)     # Fix T=6: admissible vertex ladder (V,Ni,Si) under SALT+MIE
+#   decompose(8)    # Internal ladder only: admissible (T,Ni,Si) for V=8 under SALT+MIE
 #
-# C) Enumeration / exploration (face-type distributions for fixed V,S)
-#   Pk_wizard(V=20, S=24)        # Count/enumerate Pk solutions at (V,S)
+# C) Enumeration / exploration (face-type distributions for fixed V and flatness S)
+#   Pk_wizard(V=20, S=24)          # Enumerate admissible face-type solutions at V=20, flatness S=24
 #   Pk_wizard(V=20, S=24, k_max=5) # Same, restricting to face degrees ≤ 5
 #
 #
@@ -24,7 +43,7 @@
 #   Pk_summary(out)
 #
 # E) Loose flatness-only upper bound on admissible face-type configurations as function of V (partition growth)
-#   face_multiset_upperbound(20)
+#   face_multiset_upperbound(20)  # Estimate upper bound for face-type configurations of 20-vertex polyhedron
 #
 #
 # =============================================================================
@@ -826,9 +845,9 @@ print.face_multiset_upperbound <- function(x, ...) {
 #' Necessary symbolic bounds only (no realizability implied).
 #'
 #' @param T integer >= 1
-#' @return data.frame of class 'V_ladder_from_T' with columns V, Si, T
+#' @return data.frame of class 'T_report' with columns V, Si, T
 #' @export
-V_ladder_from_T <- function(T) {
+T_report <- function(T) {
   T <- as.integer(T)
   if (length(T) != 1 || is.na(T) || T < 1L) stop("T must be a single integer >= 1.")
   
@@ -837,7 +856,7 @@ V_ladder_from_T <- function(T) {
   
   if (V_min > V_max) {
     out <- data.frame(V = integer(0), Si = integer(0), Ni = integer(0), T = integer(0))
-    class(out) <- c("V_ladder_from_T", "data.frame")
+    class(out) <- c("T_report", "data.frame")
     return(out)
   }
   
@@ -846,19 +865,19 @@ V_ladder_from_T <- function(T) {
   Ni_vals <- (V_vals - 4L) + 2L * Si_vals
   
   out <- data.frame(V = V_vals, Si = Si_vals, Ni = Ni_vals, T = rep.int(T, length(V_vals)))
-  class(out) <- c("V_ladder_from_T", "data.frame")
+  class(out) <- c("T_report", "data.frame")
   out
 }
 
 #' @export
-print.V_ladder_from_T <- function(x, ...) {
+print.T_report <- function(x, ...) {
   if (nrow(x) == 0L) {
-    cat("V_ladder_from_T: no admissible vertex counts under SALT+MIE.\n")
+    cat("T_report: no admissible vertex counts under SALT+MIE.\n")
     return(invisible(x))
   }
   
   T <- x$T[1]
-  cat(sprintf("V_ladder_from_T(T=%d)\n\n", T))
+  cat(sprintf("T_report(T=%d)\n\n", T))
   cat("Admissible vertex ladder under SALT+MIE:\n")
   
   y <- x[, c("V", "T", "Ni", "Si"), drop = FALSE]
